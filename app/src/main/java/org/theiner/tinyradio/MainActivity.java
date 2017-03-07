@@ -314,13 +314,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
-        mNotificationManager.cancel(0);
-        mNotificationManager.cancelAll();
-    }
-
-    @Override
     protected void onDestroy() {
         super.onDestroy();
         mNotificationManager.cancel(0);
