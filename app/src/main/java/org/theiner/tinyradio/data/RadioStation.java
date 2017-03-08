@@ -13,7 +13,7 @@ import java.util.List;
 public class RadioStation {
     private String name;
     private String url;
-    private String title = "";
+    private String title = "Unbekannt";
     private boolean isPlaying = false;
     private boolean isInitialState = true;
     private SongTitleStrategy strategy = null;

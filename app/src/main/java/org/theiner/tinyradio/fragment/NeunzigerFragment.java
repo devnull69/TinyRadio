@@ -21,8 +21,7 @@ import org.theiner.tinyradio.util.Helper;
  * Created by TTheiner on 08.03.2017.
  */
 
-public class AlleStationen extends Fragment {
-
+public class NeunzigerFragment extends Fragment {
     private ListView lvStations = null;
     private BaseAdapter adapter = null;
 
@@ -43,7 +42,7 @@ public class AlleStationen extends Fragment {
         lvStations = (ListView) layout.findViewById(R.id.lvStations);
         app = (TinyRadioApplication) me.getApplicationContext();
 
-        adapter = new RadioStationAdapter(me, app.getStations());
+        adapter = new RadioStationAdapter(me, Helper.getFilteredStations(app.getStations(), RadioKategorie.Neunziger));
         lvStations.setAdapter(adapter);
 
         lvStations.setOnItemClickListener(clicklistener);
@@ -69,5 +68,4 @@ public class AlleStationen extends Fragment {
             me.notifyStationClicked(selected);
         }
     };
-
 }

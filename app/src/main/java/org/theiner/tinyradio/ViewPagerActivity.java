@@ -17,18 +17,12 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.view.ViewPager;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
 
 import org.theiner.tinyradio.adapter.MyPagerAdapter;
 import org.theiner.tinyradio.async.GetCurrentSong;
@@ -36,12 +30,12 @@ import org.theiner.tinyradio.context.TinyRadioApplication;
 import org.theiner.tinyradio.data.RadioKategorie;
 import org.theiner.tinyradio.data.RadioStation;
 import org.theiner.tinyradio.fragment.AchtzigerFragment;
-import org.theiner.tinyradio.fragment.AlleStationen;
+import org.theiner.tinyradio.fragment.AlleStationenFragment;
 import org.theiner.tinyradio.fragment.MetalFragment;
+import org.theiner.tinyradio.fragment.NeunzigerFragment;
 import org.theiner.tinyradio.fragment.SenderFragment;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
@@ -57,7 +51,8 @@ public class ViewPagerActivity extends AppCompatActivity {
     private MetalFragment metalFragment;
     private SenderFragment senderFragment;
     private AchtzigerFragment achtzigerFragment;
-    private AlleStationen alleStationen;
+    private NeunzigerFragment neunzigerFragment;
+    private AlleStationenFragment alleStationenFragment;
 
     private TinyRadioApplication app;
     private List<RadioStation> stations;
@@ -85,6 +80,7 @@ public class ViewPagerActivity extends AppCompatActivity {
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tab_layout);
         tabLayout.addTab(tabLayout.newTab().setText(RadioKategorie.Metal.getDescription()));
         tabLayout.addTab(tabLayout.newTab().setText(RadioKategorie.Achtziger.getDescription()));
+        tabLayout.addTab(tabLayout.newTab().setText(RadioKategorie.Neunziger.getDescription()));
         tabLayout.addTab(tabLayout.newTab().setText(RadioKategorie.Sender.getDescription()));
         tabLayout.addTab(tabLayout.newTab().setText("Alle"));
         tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
@@ -137,10 +133,12 @@ public class ViewPagerActivity extends AppCompatActivity {
         fragments.add(metalFragment);
         achtzigerFragment = (AchtzigerFragment ) Fragment.instantiate(this, AchtzigerFragment.class.getName());
         fragments.add(achtzigerFragment);
+        neunzigerFragment = (NeunzigerFragment) Fragment.instantiate(this, NeunzigerFragment.class.getName());
+        fragments.add(neunzigerFragment);
         senderFragment = (SenderFragment )Fragment.instantiate(this, SenderFragment.class.getName());
         fragments.add(senderFragment);
-        alleStationen = (AlleStationen ) Fragment.instantiate(this, AlleStationen.class.getName());
-        fragments.add(alleStationen);
+        alleStationenFragment = (AlleStationenFragment) Fragment.instantiate(this, AlleStationenFragment.class.getName());
+        fragments.add(alleStationenFragment);
         this.mPagerAdapter  = new MyPagerAdapter(getSupportFragmentManager(), fragments);
 
         ViewPager pager = (ViewPager) findViewById(R.id.vpPager);
@@ -159,8 +157,11 @@ public class ViewPagerActivity extends AppCompatActivity {
             case("80er"):
                 vpPager.setCurrentItem(1, false);
                 break;
-            case("Sender"):
+            case("90er"):
                 vpPager.setCurrentItem(2, false);
+                break;
+            case("Sender"):
+                vpPager.setCurrentItem(3, false);
                 break;
             default:
                 vpPager.setCurrentItem(0, false);
@@ -343,7 +344,8 @@ public class ViewPagerActivity extends AppCompatActivity {
         metalFragment.notifyDataSetChanged();
         senderFragment.notifyDataSetChanged();
         achtzigerFragment.notifyDataSetChanged();
-        alleStationen.notifyDataSetChanged();
+        neunzigerFragment.notifyDataSetChanged();
+        alleStationenFragment.notifyDataSetChanged();
     }
 
     Runnable mGetSongTitle = new Runnable() {
