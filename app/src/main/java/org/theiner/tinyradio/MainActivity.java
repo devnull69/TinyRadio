@@ -57,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
     private Bitmap largeNotificationIcon = null;
 
     private NotificationManager mNotificationManager;
+    private boolean somethingPlaying = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -139,7 +140,7 @@ public class MainActivity extends AppCompatActivity {
                         public void onCheckComplete(String result) {
                         adapter.notifyDataSetChanged();
                         // show notification
-                        if(currentStation != null) {
+                        if(currentStation != null && somethingPlaying) {
                             NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(me)
                                     .setSmallIcon(R.mipmap.smallicon) // notification icon
                                     .setLargeIcon(largeNotificationIcon)
@@ -193,6 +194,8 @@ public class MainActivity extends AppCompatActivity {
 
             currentStation = selected;
 
+            somethingPlaying = true;
+
             if (!currentStation.isPlaying()) {
                 currentStation.setPlaying(true);
                 if (currentStation.isInitialState())
@@ -206,24 +209,30 @@ public class MainActivity extends AppCompatActivity {
                 currentStation.setPlaying(false);
                 if (mediaPlayer.isPlaying())
                     mediaPlayer.pause();
+                somethingPlaying = false;
             }
 
             adapter.notifyDataSetChanged();
 
-            // show notification
-            NotificationCompat.Builder mBuilder =   new NotificationCompat.Builder(me)
-                    .setSmallIcon(R.mipmap.smallicon) // notification icon
-                    .setLargeIcon(largeNotificationIcon)
-                    .setContentTitle(currentStation.getTitle()) // title for notification
-                    .setContentText(currentStation.getName()) // message for notification
-                    .setAutoCancel(false)
-                    .setVisibility(NotificationCompat.VISIBILITY_PUBLIC); // clear notification after click
-            Intent intent = new Intent(me, MainActivity.class);
-            PendingIntent pi = PendingIntent.getActivity(me, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-            mBuilder.setContentIntent(pi);
-            currentNotification = mBuilder.build();
-            currentNotification.flags |= Notification.FLAG_NO_CLEAR | Notification.FLAG_ONGOING_EVENT;
-            mNotificationManager.notify(0, currentNotification);
+            if(somethingPlaying) {
+                // show notification
+                NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(me)
+                        .setSmallIcon(R.mipmap.smallicon) // notification icon
+                        .setLargeIcon(largeNotificationIcon)
+                        .setContentTitle(currentStation.getTitle()) // title for notification
+                        .setContentText(currentStation.getName()) // message for notification
+                        .setAutoCancel(false)
+                        .setVisibility(NotificationCompat.VISIBILITY_PUBLIC); // clear notification after click
+                Intent intent = new Intent(me, MainActivity.class);
+                PendingIntent pi = PendingIntent.getActivity(me, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                mBuilder.setContentIntent(pi);
+                currentNotification = mBuilder.build();
+                currentNotification.flags |= Notification.FLAG_NO_CLEAR | Notification.FLAG_ONGOING_EVENT;
+                mNotificationManager.notify(0, currentNotification);
+            } else {
+                mNotificationManager.cancel(0);
+                mNotificationManager.cancelAll();
+            }
         }
     };
 
@@ -316,8 +325,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mNotificationManager.cancel(0);
-        mNotificationManager.cancelAll();
         stopRepeatingTask();
     }
     @Override
