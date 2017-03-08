@@ -3,6 +3,9 @@ package org.theiner.tinyradio.data;
 import org.theiner.tinyradio.strategy.SongTitleStrategy;
 import org.theiner.tinyradio.util.HTTPHelper;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by TTheiner on 06.03.2017.
  */
@@ -15,10 +18,19 @@ public class RadioStation {
     private boolean isInitialState = true;
     private SongTitleStrategy strategy = null;
     private HTTPHelper httpHelper = new HTTPHelper();
+    private RadioKategorie radioKategorie;
 
     public RadioStation(String name, String url) {
         this.name = name;
         this.url = url;
+    }
+
+    public RadioKategorie getRadioKategorie() {
+        return radioKategorie;
+    }
+
+    public void setRadioKategorie(RadioKategorie radioKategorie) {
+        this.radioKategorie = radioKategorie;
     }
 
     public HTTPHelper getHttpHelper() {
