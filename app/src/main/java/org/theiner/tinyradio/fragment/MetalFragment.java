@@ -17,6 +17,8 @@ import org.theiner.tinyradio.data.RadioKategorie;
 import org.theiner.tinyradio.data.RadioStation;
 import org.theiner.tinyradio.util.Helper;
 
+import java.util.List;
+
 /**
  * Created by TTheiner on 08.03.2017.
  */
@@ -28,6 +30,8 @@ public class MetalFragment extends Fragment {
 
     private ViewPagerActivity me = null;
     private TinyRadioApplication app;
+
+    private List<RadioStation> myStations;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -43,7 +47,9 @@ public class MetalFragment extends Fragment {
         lvStations = (ListView) layout.findViewById(R.id.lvStations);
         app = (TinyRadioApplication) me.getApplicationContext();
 
-        adapter = new RadioStationAdapter(me, Helper.getFilteredStations(app.getStations(), RadioKategorie.Metal));
+        myStations = Helper.getFilteredStations(app.getStations(), RadioKategorie.Metal);
+
+        adapter = new RadioStationAdapter(me, myStations);
         lvStations.setAdapter(adapter);
 
         lvStations.setOnItemClickListener(clicklistener);
@@ -59,6 +65,15 @@ public class MetalFragment extends Fragment {
     public void notifyDataSetChanged() {
         if(adapter != null)
             adapter.notifyDataSetChanged();
+    }
+
+    public void scrollIntoView(RadioStation selected) {
+        for(int position=0; position < myStations.size(); position++) {
+            RadioStation currentStation = (RadioStation) adapter.getItem(position);
+            if(currentStation == selected) {
+                lvStations.smoothScrollToPosition(position);
+            }
+        }
     }
 
     private AdapterView.OnItemClickListener clicklistener = new AdapterView.OnItemClickListener() {

@@ -153,15 +153,19 @@ public class ViewPagerActivity extends AppCompatActivity {
         switch (currentStation.getRadioKategorie().getDescription()) {
             case("Metal"):
                 vpPager.setCurrentItem(0, false);
+                metalFragment.scrollIntoView(currentStation);
                 break;
             case("80er"):
                 vpPager.setCurrentItem(1, false);
+                achtzigerFragment.scrollIntoView(currentStation);
                 break;
             case("90er"):
                 vpPager.setCurrentItem(2, false);
+                neunzigerFragment.scrollIntoView(currentStation);
                 break;
             case("Sender"):
                 vpPager.setCurrentItem(3, false);
+                senderFragment.scrollIntoView(currentStation);
                 break;
             default:
                 vpPager.setCurrentItem(0, false);
