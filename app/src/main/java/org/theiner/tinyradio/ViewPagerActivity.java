@@ -13,6 +13,7 @@ import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.view.ViewPager;
@@ -35,6 +36,7 @@ import org.theiner.tinyradio.context.TinyRadioApplication;
 import org.theiner.tinyradio.data.RadioKategorie;
 import org.theiner.tinyradio.data.RadioStation;
 import org.theiner.tinyradio.fragment.AchtzigerFragment;
+import org.theiner.tinyradio.fragment.AlleStationen;
 import org.theiner.tinyradio.fragment.MetalFragment;
 import org.theiner.tinyradio.fragment.SenderFragment;
 
@@ -55,6 +57,7 @@ public class ViewPagerActivity extends AppCompatActivity {
     private MetalFragment metalFragment;
     private SenderFragment senderFragment;
     private AchtzigerFragment achtzigerFragment;
+    private AlleStationen alleStationen;
 
     private TinyRadioApplication app;
     private List<RadioStation> stations;
@@ -76,6 +79,16 @@ public class ViewPagerActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         super.setContentView(R.layout.view_pager_layout);
 
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        TabLayout tabLayout = (TabLayout) findViewById(R.id.tab_layout);
+        tabLayout.addTab(tabLayout.newTab().setText(RadioKategorie.Metal.getDescription()));
+        tabLayout.addTab(tabLayout.newTab().setText(RadioKategorie.Achtziger.getDescription()));
+        tabLayout.addTab(tabLayout.newTab().setText(RadioKategorie.Sender.getDescription()));
+        tabLayout.addTab(tabLayout.newTab().setText("Alle"));
+        tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
+
         mediaPlayer = new MediaPlayer();
         mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
 
@@ -89,6 +102,24 @@ public class ViewPagerActivity extends AppCompatActivity {
 
         //initialsie the pager
         this.initialisePaging();
+
+        vpPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
+        tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                vpPager.setCurrentItem(tab.getPosition());
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+
+            }
+        });
 
         mHandler = new Handler();
         startRepeatingTask();
@@ -108,12 +139,14 @@ public class ViewPagerActivity extends AppCompatActivity {
         fragments.add(achtzigerFragment);
         senderFragment = (SenderFragment )Fragment.instantiate(this, SenderFragment.class.getName());
         fragments.add(senderFragment);
+        alleStationen = (AlleStationen ) Fragment.instantiate(this, AlleStationen.class.getName());
+        fragments.add(alleStationen);
         this.mPagerAdapter  = new MyPagerAdapter(getSupportFragmentManager(), fragments);
 
         ViewPager pager = (ViewPager) findViewById(R.id.vpPager);
         pager.setAdapter(mPagerAdapter);
 
-        pager.setOffscreenPageLimit(4);
+        pager.setOffscreenPageLimit(fragments.size());
     }
 
     @Override
@@ -310,6 +343,7 @@ public class ViewPagerActivity extends AppCompatActivity {
         metalFragment.notifyDataSetChanged();
         senderFragment.notifyDataSetChanged();
         achtzigerFragment.notifyDataSetChanged();
+        alleStationen.notifyDataSetChanged();
     }
 
     Runnable mGetSongTitle = new Runnable() {
