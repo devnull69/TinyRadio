@@ -69,6 +69,9 @@ public class ViewPagerActivity extends AppCompatActivity {
     private NotificationManager mNotificationManager;
     private boolean somethingPlaying = false;
 
+    private boolean initialTitleGrab = true;
+    private ProgressDialog initialTitleProgress;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -360,21 +363,29 @@ public class ViewPagerActivity extends AppCompatActivity {
         public void run() {
             try {
                 // Infos aller RadioStationen holen
-                for(RadioStation station: stations) {
-                    GetCurrentSong.CheckCompleteListener ccl = new GetCurrentSong.CheckCompleteListener() {
-                        @Override
-                        public void onCheckComplete(String result) {
-                            notifyDataSetChanged();
-                            // show notification
-                            if(currentStation != null && somethingPlaying) {
-                                renewNotification();
-                            }
+                GetCurrentSong.CheckCompleteListener ccl = new GetCurrentSong.CheckCompleteListener() {
+                    @Override
+                    public void onCheckComplete(String result) {
+                        if (initialTitleGrab && initialTitleProgress.isShowing()) {
+                            initialTitleProgress.cancel();
                         }
-                    };
+                        initialTitleGrab = false;
+                        notifyDataSetChanged();
+                        // show notification
+                        if(currentStation != null && somethingPlaying) {
+                            renewNotification();
+                        }
+                    }
+                };
 
-                    GetCurrentSong myTask = new GetCurrentSong(ccl);
-                    myTask.execute(station);
+                if(initialTitleGrab) {
+                    initialTitleProgress = new ProgressDialog(ViewPagerActivity.this);
+                    initialTitleProgress.setMessage("Getting song titles...");
+                    initialTitleProgress.show();
                 }
+
+                GetCurrentSong myTask = new GetCurrentSong(ccl);
+                myTask.execute(stations.toArray());
             } finally {
                 mHandler.postDelayed(mGetSongTitle, mInterval);
             }

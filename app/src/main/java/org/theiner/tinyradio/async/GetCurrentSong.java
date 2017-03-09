@@ -8,7 +8,7 @@ import org.theiner.tinyradio.data.RadioStation;
  * Created by TTheiner on 06.03.2017.
  */
 
-public class GetCurrentSong extends AsyncTask<RadioStation, Void, String> {
+public class GetCurrentSong extends AsyncTask<Object, Void, String> {
 
     public static interface CheckCompleteListener {
         void onCheckComplete(String result);
@@ -21,11 +21,13 @@ public class GetCurrentSong extends AsyncTask<RadioStation, Void, String> {
     }
 
     @Override
-    protected String doInBackground(RadioStation... stations) {
+    protected String doInBackground(Object... stations) {
 
-        RadioStation rStation = stations[0];
-        if(rStation.getStrategy() != null)
-            rStation.setTitle(rStation.getStrategy().getSongTitle(rStation.getHttpHelper()));
+        for(Object station: stations) {
+            RadioStation rStation = (RadioStation) station;
+            if(rStation.getStrategy() != null)
+                rStation.setTitle(rStation.getStrategy().getSongTitle(rStation.getHttpHelper()));
+        }
         return "Ok";
 
     }
