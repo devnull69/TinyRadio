@@ -234,6 +234,9 @@ public class ViewPagerActivity extends AppCompatActivity {
 
         if (!currentStation.isPlaying()) {
             currentStation.setPlaying(true);
+            // Notify fragments that data set has changed
+            notifyDataSetChanged();
+
             if (currentStation.isInitialState())
                 new Player()
                         .execute(currentStation.getUrl());
@@ -243,13 +246,13 @@ public class ViewPagerActivity extends AppCompatActivity {
             }
         } else {
             currentStation.setPlaying(false);
+            // Notify fragments that data set has changed
+            notifyDataSetChanged();
+
             if (mediaPlayer.isPlaying())
                 mediaPlayer.pause();
             somethingPlaying = false;
         }
-
-        // Notify fragments that data set has changed
-        notifyDataSetChanged();
 
         if(somethingPlaying) {
             renewNotification();
