@@ -4,6 +4,7 @@ import android.app.Application;
 
 import org.theiner.tinyradio.data.RadioKategorie;
 import org.theiner.tinyradio.data.RadioStation;
+import org.theiner.tinyradio.strategy.RPRStrategy;
 import org.theiner.tinyradio.strategy.RadioDEStrategy;
 import org.theiner.tinyradio.strategy.EinsliveStrategy;
 import org.theiner.tinyradio.strategy.FFHStrategy;
@@ -163,8 +164,13 @@ public class TinyRadioApplication extends Application {
         rs.setRadioKategorie(RadioKategorie.Achtziger);
         stations.add(rs);
 
-        rs = new RadioStation("RPR1 Neue Deutsche Welle", "http://streams.rpr1.de/rpr-ndw-128-mp3");
-        rs.setStrategy(new RadioDEStrategy("41162"));
+        rs = new RadioStation("RPR1 80er", "http://streams.rpr1.de/rpr-80er-128-aac");
+        rs.setStrategy(new RPRStrategy("80er"));
+        rs.setRadioKategorie(RadioKategorie.Achtziger);
+        stations.add(rs);
+
+        rs = new RadioStation("RPR1 Neue Deutsche Welle", "http://streams.rpr1.de/rpr-ndw-128-aac");
+        rs.setStrategy(new RPRStrategy("ndw"));
         rs.setRadioKategorie(RadioKategorie.Achtziger);
         stations.add(rs);
 
