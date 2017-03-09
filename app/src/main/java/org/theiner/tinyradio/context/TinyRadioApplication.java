@@ -163,6 +163,11 @@ public class TinyRadioApplication extends Application {
         rs.setRadioKategorie(RadioKategorie.Achtziger);
         stations.add(rs);
 
+        rs = new RadioStation("RPR1 Neue Deutsche Welle", "http://streams.rpr1.de/rpr-ndw-128-mp3");
+        rs.setStrategy(new RadioDEStrategy("41162"));
+        rs.setRadioKategorie(RadioKategorie.Achtziger);
+        stations.add(rs);
+
         rs = new RadioStation("R.SH 90er", "http://regiocast.hoerradar.de/rsh-90er-mp3-hq");
         rs.setStrategy(new RSHStrategy(7));
         rs.setRadioKategorie(RadioKategorie.Neunziger);

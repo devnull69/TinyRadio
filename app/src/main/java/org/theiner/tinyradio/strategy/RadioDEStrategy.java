@@ -1,5 +1,6 @@
 package org.theiner.tinyradio.strategy;
 
+import org.apache.commons.lang3.text.WordUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -28,6 +29,8 @@ public class RadioDEStrategy implements SongTitleStrategy {
             JSONArray bayernArr = new JSONArray(bayernJson);
             JSONObject bayernObj = bayernArr.getJSONObject(0);
             ergebnis = bayernObj.getString("streamTitle");
+
+            ergebnis = WordUtils.capitalizeFully(ergebnis);
         } catch (JSONException e) {
             e.printStackTrace();
         }
