@@ -19,6 +19,8 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.telephony.PhoneStateListener;
+import android.telephony.TelephonyManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Menu;
@@ -124,6 +126,11 @@ public class ViewPagerActivity extends AppCompatActivity {
         startRepeatingTask();
 
         mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+        // Phone call listener
+        PhoneCallListener callListener = new PhoneCallListener();
+        TelephonyManager mTM = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+        mTM.listen(callListener, PhoneStateListener.LISTEN_CALL_STATE);
     }
 
     /**
@@ -410,5 +417,38 @@ public class ViewPagerActivity extends AppCompatActivity {
         currentNotification = mBuilder.build();
         currentNotification.flags |= Notification.FLAG_NO_CLEAR | Notification.FLAG_ONGOING_EVENT;
         mNotificationManager.notify(0, currentNotification);
+    }
+
+    private class PhoneCallListener extends PhoneStateListener {
+
+        private boolean isPhoneCalling = false;
+
+        @Override
+        public void onCallStateChanged(int state, String incomingNumber) {
+
+            if (TelephonyManager.CALL_STATE_RINGING == state) {
+                isPhoneCalling = true;
+                if(currentStation != null)
+                    notifyStationClicked(currentStation);
+            }
+
+            if (TelephonyManager.CALL_STATE_OFFHOOK == state) {
+                isPhoneCalling = true;
+                if(somethingPlaying && currentStation != null)
+                    notifyStationClicked(currentStation);
+            }
+
+            if (TelephonyManager.CALL_STATE_IDLE == state) {
+
+                if (isPhoneCalling) {
+                    if(currentStation != null)
+                        notifyStationClicked(currentStation);
+                    isPhoneCalling = false;
+                }
+
+            }
+
+
+        }
     }
 }
