@@ -273,7 +273,6 @@ public class ViewPagerActivity extends AppCompatActivity {
 
         @Override
         protected Boolean doInBackground(String... params) {
-            // TODO Auto-generated method stub
             Boolean prepared;
             try {
 
@@ -283,33 +282,28 @@ public class ViewPagerActivity extends AppCompatActivity {
 
                     @Override
                     public void onCompletion(MediaPlayer mp) {
-                        // TODO Auto-generated method stub
                         currentStation.setInitialState(true);
                         currentStation.setPlaying(false);
                         mediaPlayer.stop();
                         mediaPlayer.reset();
 
-                        // Notify fragments that data set has changed
-                        notifyDataSetChanged();
+                        // reconnect after completion
+                        notifyStationClicked(currentStation);
                     }
                 });
                 mediaPlayer.prepare();
                 prepared = true;
             } catch (IllegalArgumentException e) {
-                // TODO Auto-generated catch block
                 Log.d("IllegarArgument", e.getMessage());
                 prepared = false;
                 e.printStackTrace();
             } catch (SecurityException e) {
-                // TODO Auto-generated catch block
                 prepared = false;
                 e.printStackTrace();
             } catch (IllegalStateException e) {
-                // TODO Auto-generated catch block
                 prepared = false;
                 e.printStackTrace();
             } catch (IOException e) {
-                // TODO Auto-generated catch block
                 prepared = false;
                 e.printStackTrace();
             }
@@ -318,7 +312,6 @@ public class ViewPagerActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(Boolean result) {
-            // TODO Auto-generated method stub
             super.onPostExecute(result);
             if (progress.isShowing()) {
                 progress.cancel();
@@ -335,7 +328,6 @@ public class ViewPagerActivity extends AppCompatActivity {
 
         @Override
         protected void onPreExecute() {
-            // TODO Auto-generated method stub
             super.onPreExecute();
             this.progress.setMessage("Buffering...");
             this.progress.show();
