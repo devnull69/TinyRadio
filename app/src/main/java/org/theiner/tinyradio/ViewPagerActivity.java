@@ -8,8 +8,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Typeface;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -25,6 +28,8 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Toast;
 
 import org.theiner.tinyradio.adapter.MyPagerAdapter;
 import org.theiner.tinyradio.async.GetCurrentSong;
@@ -90,47 +95,59 @@ public class ViewPagerActivity extends AppCompatActivity {
         tabLayout.addTab(tabLayout.newTab().setText("Alle"));
         tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
 
-        mediaPlayer = new MediaPlayer();
-        mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+        // Bei bestehender Netzwerkverbindung:
+        ConnectivityManager connMgr = (ConnectivityManager)
+                getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+        if (networkInfo != null && networkInfo.isConnected()) {
+            mediaPlayer = new MediaPlayer();
+            mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
 
-        largeNotificationIcon = getLargeIcon();
+            largeNotificationIcon = getLargeIcon();
 
-        vpPager = (ViewPager) findViewById(R.id.vpPager);
+            vpPager = (ViewPager) findViewById(R.id.vpPager);
 
-        app = (TinyRadioApplication) getApplicationContext();
-        app.initRadioStations();
-        stations = app.getStations();
+            app = (TinyRadioApplication) getApplicationContext();
+            app.initRadioStations();
+            stations = app.getStations();
 
-        //initialsie the pager
-        this.initialisePaging();
+            //initialsie the pager
+            this.initialisePaging();
 
-        vpPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
-        tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-            @Override
-            public void onTabSelected(TabLayout.Tab tab) {
-                vpPager.setCurrentItem(tab.getPosition());
-            }
+            vpPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
+            tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+                @Override
+                public void onTabSelected(TabLayout.Tab tab) {
+                    vpPager.setCurrentItem(tab.getPosition());
+                }
 
-            @Override
-            public void onTabUnselected(TabLayout.Tab tab) {
+                @Override
+                public void onTabUnselected(TabLayout.Tab tab) {
 
-            }
+                }
 
-            @Override
-            public void onTabReselected(TabLayout.Tab tab) {
+                @Override
+                public void onTabReselected(TabLayout.Tab tab) {
 
-            }
-        });
+                }
+            });
 
-        mHandler = new Handler();
-        startRepeatingTask();
+            mHandler = new Handler();
+            startRepeatingTask();
 
-        mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
-        // Phone call listener
-        PhoneCallListener callListener = new PhoneCallListener();
-        TelephonyManager mTM = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-        mTM.listen(callListener, PhoneStateListener.LISTEN_CALL_STATE);
+            // Phone call listener
+            PhoneCallListener callListener = new PhoneCallListener();
+            TelephonyManager mTM = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+            mTM.listen(callListener, PhoneStateListener.LISTEN_CALL_STATE);
+        }
+        else {
+            //Keine Netzwerkverbindung
+
+            Toast.makeText(this, "Es konnte keine Internetverbindung festgestellt werden.", Toast.LENGTH_LONG).show();
+        }
+
     }
 
     /**
@@ -208,8 +225,10 @@ public class ViewPagerActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if(id == R.id.action_close) {
-            mNotificationManager.cancel(0);
-            mNotificationManager.cancelAll();
+            if(mNotificationManager != null) {
+                mNotificationManager.cancel(0);
+                mNotificationManager.cancelAll();
+            }
 //            stopRepeatingTask();
             System.exit(0);
         }
