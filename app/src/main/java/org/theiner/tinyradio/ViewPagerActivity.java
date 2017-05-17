@@ -41,6 +41,7 @@ import org.theiner.tinyradio.fragment.AlleStationenFragment;
 import org.theiner.tinyradio.fragment.MetalFragment;
 import org.theiner.tinyradio.fragment.NeunzigerFragment;
 import org.theiner.tinyradio.fragment.SenderFragment;
+import org.theiner.tinyradio.util.HTTPHelper;
 
 import java.io.IOException;
 import java.util.List;
@@ -302,6 +303,9 @@ public class ViewPagerActivity extends AppCompatActivity {
             Boolean prepared;
             try {
 
+                HTTPHelper helper = new HTTPHelper();
+                helper.checkConnectionOrThrow(params[0], 7000);
+
                 mediaPlayer.setDataSource(params[0]);
 
                 mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
@@ -317,10 +321,14 @@ public class ViewPagerActivity extends AppCompatActivity {
                         notifyStationClicked(currentStation);
                     }
                 });
+
                 mediaPlayer.prepare();
                 prepared = true;
+            } catch (InterruptedException e) {
+                prepared = false;
+                e.printStackTrace();
             } catch (IllegalArgumentException e) {
-                Log.d("IllegarArgument", e.getMessage());
+                Log.d("IllegalArgument", e.getMessage());
                 prepared = false;
                 e.printStackTrace();
             } catch (SecurityException e) {
@@ -343,9 +351,15 @@ public class ViewPagerActivity extends AppCompatActivity {
                 progress.cancel();
             }
             Log.d("Prepared", "//" + result);
-            mediaPlayer.start();
-
-            currentStation.setInitialState(false);
+            if(result) {
+                mediaPlayer.start();
+                currentStation.setInitialState(false);
+            } else {
+                somethingPlaying = false;
+                currentStation.setPlaying(false);
+                notifyDataSetChanged();
+                Toast.makeText(ViewPagerActivity.this, "Radio station does not respond!", Toast.LENGTH_LONG).show();
+            }
         }
 
         public Player() {
@@ -356,9 +370,11 @@ public class ViewPagerActivity extends AppCompatActivity {
         protected void onPreExecute() {
             super.onPreExecute();
             this.progress.setMessage("Buffering...");
+            this.progress.setCancelable(false);
             this.progress.show();
 
         }
+
     }
 
     private Bitmap getLargeIcon() {
@@ -402,6 +418,7 @@ public class ViewPagerActivity extends AppCompatActivity {
                 if(initialTitleGrab) {
                     initialTitleProgress = new ProgressDialog(ViewPagerActivity.this);
                     initialTitleProgress.setMessage("Getting song titles...");
+                    initialTitleProgress.setCancelable(false);
                     initialTitleProgress.show();
                 }
 

@@ -93,6 +93,22 @@ public class HTTPHelper {
         return returnValue;
     }
 
+    public boolean checkConnectionOrThrow(String strUrl, int timeoutInMillis) throws InterruptedException {
+        URL url = null;
+
+        try {
+            url = new URL(strUrl);
+            URLConnection con = url.openConnection();
+
+            con.setConnectTimeout(timeoutInMillis);
+            con.connect();
+
+            return true;
+        } catch (IOException e) {
+            throw new InterruptedException();
+        }
+    }
+
     public String unPACKED(String[] k, String p, int a) {
         int c = k.length;
 
