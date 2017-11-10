@@ -10,15 +10,23 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
 import android.media.AudioManager;
+import android.media.MediaMetadata;
+import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
+import android.media.RemoteControlClient;
+import android.media.session.MediaSession;
+import android.media.session.PlaybackState;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.SystemClock;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.media.session.MediaButtonReceiver;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -36,6 +44,7 @@ import org.theiner.tinyradio.async.GetCurrentSong;
 import org.theiner.tinyradio.context.TinyRadioApplication;
 import org.theiner.tinyradio.data.RadioKategorie;
 import org.theiner.tinyradio.data.RadioStation;
+import org.theiner.tinyradio.data.TrackData;
 import org.theiner.tinyradio.fragment.AchtzigerFragment;
 import org.theiner.tinyradio.fragment.AlleStationenFragment;
 import org.theiner.tinyradio.fragment.MetalFragment;
@@ -79,6 +88,10 @@ public class ViewPagerActivity extends AppCompatActivity {
 
     private boolean initialTitleGrab = true;
     private ProgressDialog initialTitleProgress;
+
+    private AudioManager mAudioManager;
+    private RemoteControlClient mRemoteControlClient;
+    private MediaSession mMediaSession;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -149,6 +162,20 @@ public class ViewPagerActivity extends AppCompatActivity {
             Toast.makeText(this, "Es konnte keine Internetverbindung festgestellt werden.", Toast.LENGTH_LONG).show();
         }
 
+        // Init bluetooth audio for metadata
+        if (mAudioManager == null) {
+            mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        }
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            if (mRemoteControlClient == null) {
+                Log.d("init()", "API " + Build.VERSION.SDK_INT + " lower then " + Build.VERSION_CODES.LOLLIPOP);
+                Log.d("init()", "Using RemoteControlClient API.");
+
+                mRemoteControlClient = new RemoteControlClient(PendingIntent.getBroadcast(this, 0, new Intent(Intent.ACTION_MEDIA_BUTTON), 0));
+                mAudioManager.registerRemoteControlClient(mRemoteControlClient);
+            }
+        }
     }
 
     /**
@@ -453,6 +480,9 @@ public class ViewPagerActivity extends AppCompatActivity {
         currentNotification = mBuilder.build();
         currentNotification.flags |= Notification.FLAG_NO_CLEAR | Notification.FLAG_ONGOING_EVENT;
         mNotificationManager.notify(0, currentNotification);
+
+        // eventually send meta information to bluetooth device
+        bluetoothNotifyChange(new TrackData(currentStation.getTitle(), currentStation.getName()));
     }
 
     private class PhoneCallListener extends PhoneStateListener {
@@ -485,6 +515,54 @@ public class ViewPagerActivity extends AppCompatActivity {
             }
 
 
+        }
+    }
+
+    private void bluetoothNotifyChange(TrackData td) {
+        String title = td.getTrackName();
+        String artist = td.getStationName();
+        String album = td.getArtistName();
+        long duration = 240000;
+        long trackNumber = 1;
+        long position = 1;
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+
+            mRemoteControlClient.setPlaybackState(RemoteControlClient.PLAYSTATE_STOPPED, 0, 1.0f);
+
+            RemoteControlClient.MetadataEditor ed = mRemoteControlClient.editMetadata(true);
+            ed.putString(MediaMetadataRetriever.METADATA_KEY_TITLE, title);
+            ed.putString(MediaMetadataRetriever.METADATA_KEY_ARTIST, artist);
+            ed.putString(MediaMetadataRetriever.METADATA_KEY_ALBUM, album);
+            ed.putLong(MediaMetadataRetriever.METADATA_KEY_DURATION, duration);
+            ed.putLong(MediaMetadataRetriever.METADATA_KEY_CD_TRACK_NUMBER, trackNumber);
+            ed.apply();
+
+            mRemoteControlClient.setPlaybackState(RemoteControlClient.PLAYSTATE_PLAYING, position, 1.0f);
+        } else {
+
+            if(mMediaSession != null)
+                mMediaSession.release();
+            mMediaSession = null;
+            mMediaSession = new MediaSession(this, "PlayerServiceMediaSession");
+            mMediaSession.setFlags(MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS);
+            mMediaSession.setActive(true);
+
+            MediaMetadata metadata = new MediaMetadata.Builder()
+                    .putString(MediaMetadata.METADATA_KEY_TITLE, title)
+                    .putString(MediaMetadata.METADATA_KEY_ARTIST, artist)
+                    .putString(MediaMetadata.METADATA_KEY_ALBUM, album)
+                    .putLong(MediaMetadata.METADATA_KEY_DURATION, duration)
+                    .putLong(MediaMetadata.METADATA_KEY_TRACK_NUMBER, trackNumber)
+                    .build();
+
+            mMediaSession.setMetadata(metadata);
+
+            PlaybackState state = new PlaybackState.Builder()
+                    .setActions(PlaybackState.ACTION_PLAY)
+                    .setState(PlaybackState.STATE_PLAYING, position, 1.0f, SystemClock.elapsedRealtime())
+                    .build();
+
+            mMediaSession.setPlaybackState(state);
         }
     }
 }
