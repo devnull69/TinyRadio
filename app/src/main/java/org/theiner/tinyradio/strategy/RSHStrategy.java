@@ -24,7 +24,7 @@ public class RSHStrategy implements SongTitleStrategy {
     public String getSongTitle(HTTPHelper myHttpHelper) {
         String ergebnis = "Unbekannt";
 
-        String rshJson = myHttpHelper.getHtmlFromUrl(url + (new Date()).getTime(), "", false);
+        String rshJson = myHttpHelper.getHtmlFromUrl(url, "", false);
 
         try {
             JSONObject rshObj = new JSONObject(rshJson);

@@ -10,9 +10,12 @@ public class TrackData {
     private String stationName;
 
     public TrackData(String playlistEntry, String stationName) {
-        String[] parts = playlistEntry.split("-");
+        String[] parts = playlistEntry.split(" - ");
         String artistName = parts[0];
-        String trackName = parts[1];
+        String trackName = "";
+        for(int i=1; i<parts.length; i++) {
+            trackName = trackName + " " + parts[i];
+        }
 
         this.artistName = artistName;
         this.trackName = trackName;
@@ -41,5 +44,12 @@ public class TrackData {
 
     public void setStationName(String stationName) {
         this.stationName = stationName;
+    }
+
+    public boolean equals(TrackData td) {
+        boolean result = false;
+        if(this.artistName.equals(td.getArtistName()) && this.trackName.equals(td.getTrackName()))
+            result = true;
+        return result;
     }
 }

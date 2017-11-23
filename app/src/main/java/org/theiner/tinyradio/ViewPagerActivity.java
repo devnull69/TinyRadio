@@ -8,7 +8,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Typeface;
 import android.media.AudioManager;
 import android.media.MediaMetadata;
 import android.media.MediaMetadataRetriever;
@@ -26,7 +25,6 @@ import android.os.SystemClock;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.NotificationCompat;
-import android.support.v4.media.session.MediaButtonReceiver;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -36,12 +34,12 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.Toast;
 
 import org.theiner.tinyradio.adapter.MyPagerAdapter;
 import org.theiner.tinyradio.async.GetCurrentSong;
 import org.theiner.tinyradio.context.TinyRadioApplication;
+import org.theiner.tinyradio.data.LastTracks;
 import org.theiner.tinyradio.data.RadioKategorie;
 import org.theiner.tinyradio.data.RadioStation;
 import org.theiner.tinyradio.data.TrackData;
@@ -92,6 +90,8 @@ public class ViewPagerActivity extends AppCompatActivity {
     private AudioManager mAudioManager;
     private RemoteControlClient mRemoteControlClient;
     private MediaSession mMediaSession;
+
+    private LastTracks lastTracks = new LastTracks();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -466,23 +466,31 @@ public class ViewPagerActivity extends AppCompatActivity {
     }
 
     private void renewNotification() {
-        // show notification
-        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
-                .setSmallIcon(R.mipmap.smallicon) // notification icon
-                .setLargeIcon(largeNotificationIcon)
-                .setContentTitle(currentStation.getTitle()) // title for notification
-                .setContentText(currentStation.getName()) // message for notification
-                .setAutoCancel(false)
-                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC); // clear notification after click
-        Intent intent = new Intent(this, ViewPagerActivity.class);
-        PendingIntent pi = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        mBuilder.setContentIntent(pi);
-        currentNotification = mBuilder.build();
-        currentNotification.flags |= Notification.FLAG_NO_CLEAR | Notification.FLAG_ONGOING_EVENT;
-        mNotificationManager.notify(0, currentNotification);
+        // eventually send meta information to bluetooth device if track has changed and is not equal to last three
+        TrackData newTrack = new TrackData(currentStation.getTitle(), currentStation.getName());
 
-        // eventually send meta information to bluetooth device
-        bluetoothNotifyChange(new TrackData(currentStation.getTitle(), currentStation.getName()));
+        if(!lastTracks.contains(newTrack)) {
+
+            // put in list
+            lastTracks.enqueue(newTrack);
+
+            // show notification
+            NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
+                    .setSmallIcon(R.mipmap.smallicon) // notification icon
+                    .setLargeIcon(largeNotificationIcon)
+                    .setContentTitle(currentStation.getTitle()) // title for notification
+                    .setContentText(currentStation.getName()) // message for notification
+                    .setAutoCancel(false)
+                    .setVisibility(NotificationCompat.VISIBILITY_PUBLIC); // clear notification after click
+            Intent intent = new Intent(this, ViewPagerActivity.class);
+            PendingIntent pi = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            mBuilder.setContentIntent(pi);
+            currentNotification = mBuilder.build();
+            currentNotification.flags |= Notification.FLAG_NO_CLEAR | Notification.FLAG_ONGOING_EVENT;
+            mNotificationManager.notify(0, currentNotification);
+
+            bluetoothNotifyChange(newTrack);
+        }
     }
 
     private class PhoneCallListener extends PhoneStateListener {
@@ -547,11 +555,12 @@ public class ViewPagerActivity extends AppCompatActivity {
             mMediaSession.setFlags(MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS);
             mMediaSession.setActive(true);
 
+            // Leerstrings setzen
             MediaMetadata metadata = new MediaMetadata.Builder()
-                    .putString(MediaMetadata.METADATA_KEY_TITLE, title)
-                    .putString(MediaMetadata.METADATA_KEY_ARTIST, artist)
-                    .putString(MediaMetadata.METADATA_KEY_ALBUM, album)
-                    .putLong(MediaMetadata.METADATA_KEY_DURATION, duration)
+                    .putString(MediaMetadata.METADATA_KEY_TITLE, "")
+                    .putString(MediaMetadata.METADATA_KEY_ARTIST, "")
+                    .putString(MediaMetadata.METADATA_KEY_ALBUM, "")
+                    .putLong(MediaMetadata.METADATA_KEY_DURATION, 1)
                     .putLong(MediaMetadata.METADATA_KEY_TRACK_NUMBER, trackNumber)
                     .build();
 
@@ -563,6 +572,17 @@ public class ViewPagerActivity extends AppCompatActivity {
                     .build();
 
             mMediaSession.setPlaybackState(state);
+
+            metadata = new MediaMetadata.Builder()
+                    .putString(MediaMetadata.METADATA_KEY_TITLE, title)
+                    .putString(MediaMetadata.METADATA_KEY_ARTIST, artist)
+                    .putString(MediaMetadata.METADATA_KEY_ALBUM, album)
+                    .putLong(MediaMetadata.METADATA_KEY_DURATION, duration)
+                    .putLong(MediaMetadata.METADATA_KEY_TRACK_NUMBER, trackNumber)
+                    .build();
+
+            mMediaSession.setMetadata(metadata);
+
         }
     }
 }

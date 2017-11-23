@@ -13,8 +13,10 @@ import org.theiner.tinyradio.strategy.RSHStrategy;
 import org.theiner.tinyradio.strategy.Radio912Strategy;
 import org.theiner.tinyradio.strategy.RegenbogenStrategy;
 import org.theiner.tinyradio.strategy.RockAntenneStrategy;
+import org.theiner.tinyradio.strategy.StahlradioStrategy;
 import org.theiner.tinyradio.strategy.WDR2Strategy;
 import org.theiner.tinyradio.strategy.WackenRadioStrategy;
+import org.theiner.tinyradio.strategy.WunschradioStrategy;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,18 +51,13 @@ public class TinyRadioApplication extends Application {
         rs.setRadioKategorie(RadioKategorie.Metal);
         stations.add(rs);
 
-        rs = new RadioStation("Metal Invasion", "http://streaming.radionomy.com/Metal-Invasion-Radio");
-        rs.setStrategy(new RadioDEStrategy("27038"));
-        rs.setRadioKategorie(RadioKategorie.Metal);
-        stations.add(rs);
-
         rs = new RadioStation("Metal Only", "http://server1.blitz-stream.de:4400/;080794759699378stream.nsv");
         rs.setStrategy(new RadioDEStrategy("4696"));
         rs.setRadioKategorie(RadioKategorie.Metal);
         stations.add(rs);
 
         rs = new RadioStation("Stahlradio", "http://streamplus52.leonex.de:22810/;940438803932481stream.nsv");
-        rs.setStrategy(new RadioDEStrategy("10416"));
+        rs.setStrategy(new StahlradioStrategy());
         rs.setRadioKategorie(RadioKategorie.Metal);
         stations.add(rs);
 
@@ -120,7 +117,7 @@ public class TinyRadioApplication extends Application {
         stations.add(rs);
 
         rs = new RadioStation("R.SH 80er", "http://regiocast.hoerradar.de/rsh-80er-mp3-hq");
-        rs.setStrategy(new RSHStrategy(6));
+        rs.setStrategy(new RSHStrategy(7));
         rs.setRadioKategorie(RadioKategorie.Achtziger);
         stations.add(rs);
 
@@ -169,13 +166,18 @@ public class TinyRadioApplication extends Application {
         rs.setRadioKategorie(RadioKategorie.Achtziger);
         stations.add(rs);
 
+        rs = new RadioStation("Wunschradio FM 80er", "http://server74.radiostreamserver.de/wunschradio-80er.mp3");
+        rs.setStrategy(new WunschradioStrategy("80er"));
+        rs.setRadioKategorie(RadioKategorie.Achtziger);
+        stations.add(rs);
+
         rs = new RadioStation("RPR1 Neue Deutsche Welle", "http://streams.rpr1.de/rpr-ndw-128-aac");
         rs.setStrategy(new RPRStrategy("ndw"));
         rs.setRadioKategorie(RadioKategorie.Achtziger);
         stations.add(rs);
 
         rs = new RadioStation("R.SH 90er", "http://regiocast.hoerradar.de/rsh-90er-mp3-hq");
-        rs.setStrategy(new RSHStrategy(7));
+        rs.setStrategy(new RSHStrategy(8));
         rs.setRadioKategorie(RadioKategorie.Neunziger);
         stations.add(rs);
 
@@ -199,8 +201,8 @@ public class TinyRadioApplication extends Application {
         rs.setRadioKategorie(RadioKategorie.Neunziger);
         stations.add(rs);
 
-        rs = new RadioStation("Wunschradio FM", "http://server74.radiostreamserver.de/wunschradio-90er.mp3");
-        rs.setStrategy(new RadioDEStrategy("21468"));
+        rs = new RadioStation("Wunschradio FM 90er", "http://server74.radiostreamserver.de/wunschradio-90er.mp3");
+        rs.setStrategy(new WunschradioStrategy("90er"));
         rs.setRadioKategorie(RadioKategorie.Neunziger);
         stations.add(rs);
 

@@ -15,6 +15,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
+import java.util.Date;
 
 /**
  * Created by TTheiner on 06.03.2017.
@@ -26,6 +27,7 @@ public class HTTPHelper {
     private static final String userAgentMobile = "Mozilla/5.0 (Linux; Android 5.0.1; Galaxy Nexus Build/IMM76B) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.133 Mobile Safari/535.19";
 
     public Document getDocumentFromUrl(String strUrl, String referer, boolean isMobile) {
+        strUrl = avoidCache(strUrl);
         Document doc = null;
         String ua = userAgent;
         if(isMobile)
@@ -48,6 +50,7 @@ public class HTTPHelper {
     }
 
     public String getHtmlFromUrl(String strUrl, String referer, boolean isMobile, boolean isIso) {
+        strUrl = avoidCache(strUrl);
         URL url = null;
         BufferedReader reader = null;
         StringBuilder sb = null;
@@ -199,5 +202,15 @@ public class HTTPHelper {
             // Log exception
             return null;
         }
+    }
+
+    private String avoidCache(String url) {
+        String result = url;
+
+        String queryMark = "?";
+        if(result.contains("?"))
+            queryMark = "&";
+
+        return result + queryMark + String.valueOf((new Date()).getTime());
     }
 }
