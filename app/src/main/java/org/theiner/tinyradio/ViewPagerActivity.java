@@ -93,6 +93,8 @@ public class ViewPagerActivity extends AppCompatActivity {
 
     private LastTracks lastTracks = new LastTracks();
 
+    private boolean isPhoneCalling = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -466,36 +468,36 @@ public class ViewPagerActivity extends AppCompatActivity {
     }
 
     private void renewNotification() {
-        // eventually send meta information to bluetooth device if track has changed and is not equal to last three
-        TrackData newTrack = new TrackData(currentStation.getTitle(), currentStation.getName());
+        if(!isPhoneCalling) {
+            // eventually send meta information to bluetooth device if track has changed and is not equal to last three
+            TrackData newTrack = new TrackData(currentStation.getTitle(), currentStation.getName());
 
-        if(!lastTracks.contains(newTrack)) {
+            if (!lastTracks.contains(newTrack)) {
 
-            // put in list
-            lastTracks.enqueue(newTrack);
+                // put in list
+                lastTracks.enqueue(newTrack);
 
-            // show notification
-            NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
-                    .setSmallIcon(R.mipmap.smallicon) // notification icon
-                    .setLargeIcon(largeNotificationIcon)
-                    .setContentTitle(currentStation.getTitle()) // title for notification
-                    .setContentText(currentStation.getName()) // message for notification
-                    .setAutoCancel(false)
-                    .setVisibility(NotificationCompat.VISIBILITY_PUBLIC); // clear notification after click
-            Intent intent = new Intent(this, ViewPagerActivity.class);
-            PendingIntent pi = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-            mBuilder.setContentIntent(pi);
-            currentNotification = mBuilder.build();
-            currentNotification.flags |= Notification.FLAG_NO_CLEAR | Notification.FLAG_ONGOING_EVENT;
-            mNotificationManager.notify(0, currentNotification);
+                // show notification
+                NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
+                        .setSmallIcon(R.mipmap.smallicon) // notification icon
+                        .setLargeIcon(largeNotificationIcon)
+                        .setContentTitle(currentStation.getTitle()) // title for notification
+                        .setContentText(currentStation.getName()) // message for notification
+                        .setAutoCancel(false)
+                        .setVisibility(NotificationCompat.VISIBILITY_PUBLIC); // clear notification after click
+                Intent intent = new Intent(this, ViewPagerActivity.class);
+                PendingIntent pi = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                mBuilder.setContentIntent(pi);
+                currentNotification = mBuilder.build();
+                currentNotification.flags |= Notification.FLAG_NO_CLEAR | Notification.FLAG_ONGOING_EVENT;
+                mNotificationManager.notify(0, currentNotification);
 
-            bluetoothNotifyChange(newTrack);
+                bluetoothNotifyChange(newTrack);
+            }
         }
     }
 
     private class PhoneCallListener extends PhoneStateListener {
-
-        private boolean isPhoneCalling = false;
 
         @Override
         public void onCallStateChanged(int state, String incomingNumber) {
@@ -515,9 +517,9 @@ public class ViewPagerActivity extends AppCompatActivity {
             if (TelephonyManager.CALL_STATE_IDLE == state) {
 
                 if (isPhoneCalling) {
+                    isPhoneCalling = false;
                     if(currentStation != null)
                         notifyStationClicked(currentStation);
-                    isPhoneCalling = false;
                 }
 
             }
