@@ -116,6 +116,11 @@ public class TinyRadioApplication extends Application {
         rs.setRadioKategorie(RadioKategorie.Sender);
         stations.add(rs);
 
+        rs = new RadioStation("RTL Event", "http://rtlberlin.hoerradar.de/rtlberlin-event01-mp3-128");
+        rs.setStrategy(new RadioDEStrategy("9437"));
+        rs.setRadioKategorie(RadioKategorie.Sender);
+        stations.add(rs);
+
         rs = new RadioStation("R.SH 80er", "http://regiocast.hoerradar.de/rsh-80er-mp3-hq");
         rs.setStrategy(new RSHStrategy(7));
         rs.setRadioKategorie(RadioKategorie.Achtziger);
