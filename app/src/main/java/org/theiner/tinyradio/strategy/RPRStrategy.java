@@ -10,7 +10,7 @@ import org.theiner.tinyradio.util.HTTPHelper;
  */
 
 public class RPRStrategy implements SongTitleStrategy {
-    public final String url = "http://www.rpr1.de/sites/default/files/nocache/current_tracks.json";
+    public final String url = "https://www.rpr1.de/sites/default/files/nocache/current_tracks.json";
 
     private String streamName;
 
